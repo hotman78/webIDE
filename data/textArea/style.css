@@ -1,0 +1,15 @@
+html{
+  height: 110%;
+  width:110%
+}
+body {
+  padding: 0;
+  margin: 0;
+}
+.CodeMirror{
+  padding: 0;
+  margin: 0;
+  display:block;
+  font-family: 'Courier New', Courier, Monaco, monospace;
+  font-size：18px;
+} 
