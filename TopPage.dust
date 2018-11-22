@@ -1,0 +1,44 @@
+File dir=new File(Environment.getExternalStorageDirectory()+"/webIDE");
+void setTopPage(){
+  if(!dir.exists())dir.mkdir();
+  runUi("settingSurface");
+  runUi("setTitle");
+  runUi("setList");
+}
+void setTitle(){ 
+  ImageView tv=new ImageView(getContext());
+  AssetManager assets =getActivity().getResources().getAssets();
+  try{
+    InputStream istream = assets.open("title.png");
+    Bitmap bitmap = BitmapFactory.decodeStream(istream);
+    tv.setImageBitmap(bitmap);
+  } catch (Exception e) {
+    e.printStackTrace();
+  }
+  tv.setBackgroundColor(#002B85);
+  fl.addView(tv,getLP(0,0,width,300));
+}
+void setList(){
+  ListView listView =new ListView(getContext());
+  ArrayAdapter<String> adapter=new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1);
+  adapter.add("create new repository");
+  for(String repositoryName:dir.list()){
+    adapter.add(repositoryName);
+  }
+  listView.setAdapter(adapter);
+  listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+      if(position==0){
+        try{
+          copyFiles(null,"temp",new File(dir,"temp"));
+        }catch(IOException e){
+          e.printStackTrace();
+        }
+        
+        
+        runUi("setAlertDialog");
+      }
+    }
+  });
+  fl.addView(listView,getLP(0,300,width,height-300));
+}

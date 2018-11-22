@@ -1,0 +1,19 @@
+LinearLayout createRepositoryLayout;
+public class CreateNewRepository {
+  CreateNewRepository() {
+    runUi("setType");
+  }
+}
+void setAlertDialog() {
+  AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+  createRepositoryLayout=new LinearLayout(getContext());
+  builder.setTitle("create new repository");
+  builder.setView(createRepositoryLayout);
+  builder.show();
+}
+void setType() {
+  Spinner sp =new Spinner(getContext());
+  ArrayAdapter<String> adapter=new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1);
+  sp.setAdapter(adapter);
+  fl.addView(sp, getLP(MP, 150));
+}

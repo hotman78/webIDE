@@ -1,0 +1,113 @@
+public class CustomEditText extends AppCompatEditText implements TextWatcher {
+  private static final String LF = "\n";
+  Rect rect;
+  Paint paint;
+  String oldText;
+  File file;
+  HashMap<String, Integer> map = new HashMap<String, Integer>();
+  public CustomEditText(Context context) {
+    super(context);
+    rect = new Rect();
+    setGravity(Gravity.TOP);
+    setPadding(50, 0, 0, 0);
+    setTextSize(TypedValue.COMPLEX_UNIT_DIP,14);
+    setBackgroundColor(#FFFFFF);
+    setIncludeFontPadding(true);
+    setHorizontallyScrolling(true);
+    Typeface tf = Typeface.createFromAsset(getActivity().getAssets(), "fonts/NotoSansCJKjp-Regular.otf");
+    setTypeface(Typeface.MONOSPACE); 
+    map.put("public", Color.CYAN); 
+    map.put("void", Color.BLUE); 
+    map.put("String", Color.RED);
+    addTextChangedListener(this);
+    
+  }
+  @Override 
+    protected void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+    paint = new Paint();
+    paint.setColor(color(0, 0, 255, 10));
+    int count=getCurrentLine();
+    int baseline = getBaseline();
+    canvas.drawRect(getScrollX(), count*getLineHeight(), width+getScrollX(), (count+1)*getLineHeight(), paint);
+    paint.setStyle(Paint.Style.FILL);
+    paint.setColor(Color.BLACK);
+    paint.setTextSize(50);
+    for (int i = 0; i < getLineCount(); i++) {
+      canvas.drawText("" + (i+1), rect.left, baseline, paint);
+      baseline += getLineHeight();
+    }
+  }
+  void setFile(File file){
+    this.file=file;
+  }
+  File getFile(){
+    return file;
+  }
+  void load(){
+    //setText(join(loadStrings(file.getPath()),"\n"));
+    //webView.evaluateJavascript("javascript:myCodeMirror.setValue(\""+join(loadStrings(file.getPath()),"\n")+"\");",null);
+    webView.evaluateJavascript("javascript:myCodeMirror.setValue('"+join(loadStrings(file.getPath()),"\\n").replace("'","\\'")+"');",null);
+    setEnabled(true);
+  }
+  void cannotOpen(String text){
+    file=null;
+    setText(Html.fromHtml("<span style='color: #FF0000;'>"+text+"</span>"));
+    setEnabled(false);
+  }
+  public int getCurrentLine() {
+    if (getSelectionStart() > -1) {
+      return getLayout().getLineForOffset(getSelectionStart());
+    }
+    return -1;
+  }
+  public String line(int i) {
+    return getText().toString().split("\n")[i];
+  }
+  @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    oldText=getText().toString();
+  }
+  @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+  }
+  @Override
+  public void afterTextChanged(Editable editable) {
+    String string = editable.toString();
+    String[] split = string.split("\\s"); 
+    int startIndex = 0; 
+    editable.setSpan(new ForegroundColorSpan(#000000),0,string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    for (int i = 0; i < split.length; i++) { 
+      String s = split[i]; 
+      if (map.containsKey(s)) { 
+        int index = string.indexOf(s, startIndex); 
+        int c = map.get(s); 
+        editable.setSpan(new ForegroundColorSpan(c), index, index + s.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE); 
+        startIndex = index + s.length();
+      }
+    }
+    if (getText().toString().length() == oldText.length() + 1 && getSelectionStart() > 0) {
+      char pressedChar =getText().toString().charAt(getSelectionStart() - 1);
+      pressKeys(String.valueOf(pressedChar));
+    }
+    if(file!=null)saveStrings(file.getPath(),getText().toString().split("\n"));
+  }
+  public void pressKeys(String pressed) {
+    if (pressed.length() == 1 && pressed.charAt(0) == '\n') {
+      pressEnter();
+    }
+  }
+  public void pressEnter(){
+    String[] lines=getText().toString().split("\n",-1);
+    String lastLine=lines[Math.min(lines.length-1,getCurrentLine() - 1)];
+    String lastIndent="";
+    for(int i=0;i<lastLine.length();i++){
+      if(lastLine.charAt(i)==' '){
+        lastIndent+=" ";
+      }else{
+        break;
+      }
+    }
+    getText().insert(getSelectionStart(), lastIndent);
+  }
+}
